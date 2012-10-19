@@ -45,6 +45,8 @@ gboolean FormAccount_GetCursor(FormAccount* fa, GtkTreeModel** model, GtkTreePat
 gboolean FormAccount_KeyRelease(GtkWidget* widget, GdkEvent* event, gpointer user_data);
 gboolean FormAccount_MoneyKeyRelease(GtkWidget* widget, GdkEvent* event, gpointer user_data);
 gboolean FormAccount_MoneyNowKeyRelease(GtkWidget* widget, GdkEvent* event, gpointer user_data);
+GtkWidget* FormAccount_Part1(FormAccount* fa);
+GtkWidget* FormAccount_Part2(FormAccount* fa);
 void FormAccount_SetCursorOnLast(FormAccount* fa);
 void FormAccount_SumMoneyTotal(FormAccount* fa, GtkTreeModel* model, double* MoneyTotal);
 void FormAccount_TreeViewCategoriesRowActivated(unsigned int id, char* Desc, void* arg);
@@ -337,10 +339,9 @@ void FormAccount_CellMoneyDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* r
 
 void FormAccount_Create(FormAccount* fa, MYSQL* MySQL)
 {
-	GtkWidget *vbox, *scroll, *scroll2, *tbl, *label, *hbox;
+	GtkWidget *vbox, *scroll, *tbl1, *tbl2, *hbox1, *hbox2;
 	GtkTreeViewColumn* column;
 	GtkCellRenderer* renderer;
-	gint row1, row2;
 	
 	
 	FORM_PRESENT(fa->WindowAccount)
@@ -387,72 +388,25 @@ void FormAccount_Create(FormAccount* fa, MYSQL* MySQL)
 	gtk_container_add(GTK_CONTAINER(scroll), fa->ListViewAccount);
 	gtk_box_pack_start(GTK_BOX(vbox), scroll, TRUE, TRUE, 0);
 	
-	tbl = gtk_table_new(7, 2, FALSE);
-	row1=0; row2=1;
+	hbox1 = gtk_hbox_new(FALSE, 0);
 	
-	label = gtk_label_new("Неизвестный расход:");
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-	gtk_widget_set_usize(label, -1, 50);
-	gtk_table_attach(GTK_TABLE(tbl), label,             0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
+	tbl1 = FormAccount_Part1(fa);
+	gtk_box_pack_start(GTK_BOX(hbox1), tbl1, FALSE, FALSE, 0);
 	
-	fa->LabelRemain = gtk_label_new("REMAIN");
-	gtk_misc_set_alignment(GTK_MISC(fa->LabelRemain), 0, 0.5);
-	gtk_table_attach(GTK_TABLE(tbl), fa->LabelRemain,   1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
-	++row1; ++row2;
+	tbl2 = FormAccount_Part2(fa);
+	gtk_box_pack_start(GTK_BOX(hbox1), tbl2, TRUE, TRUE, 0);
 	
+	gtk_box_pack_start(GTK_BOX(vbox), hbox1, FALSE, FALSE, 0);
 	
-	label = gtk_label_new("Денег в настоящий момент");
-	gtk_label_set_markup(GTK_LABEL(label), "Денег в настоящий момент");
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
-	fa->EntryMoneyNow = gtk_entry_new();
-	gtk_table_attach(GTK_TABLE(tbl), fa->EntryMoneyNow, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
-	++row1; ++row2;
-	
-	label = gtk_label_new("Дата");
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
-	fa->CalendarDate = gtk_calendar_new();
-	fa->CalendarDateOnSelectEnabled = TRUE;
-	gtk_table_attach(GTK_TABLE(tbl), fa->CalendarDate, 1, 2, row1, row2, 0, 0, 0, 0);
-	++row1; ++row2;
-	
-	label = gtk_label_new("Описание");
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
-	fa->EntryDescription = gtk_entry_new();
-	gtk_table_attach(GTK_TABLE(tbl), fa->EntryDescription, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
-	++row1; ++row2;
-	
-	label = gtk_label_new("Деньги");
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
-	fa->EntryMoney = gtk_entry_new();
-	gtk_table_attach(GTK_TABLE(tbl), fa->EntryMoney, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
-	++row1; ++row2;
-	
-	label = gtk_label_new("Категория");
-	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
-	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
-	
-	scroll2 = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_set_usize(GTK_WIDGET(scroll2), -1, 170);
-	TreeViewCategories_Create(&fa->tvc, fa->MySQL);
-	gtk_container_add(GTK_CONTAINER(scroll2), fa->tvc.treeview);
-	gtk_table_attach(GTK_TABLE(tbl), scroll2, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
-	++row1; ++row2;
-	
-	gtk_box_pack_start(GTK_BOX(vbox), tbl, FALSE, FALSE, 0);
-	
-	hbox = gtk_hbox_new(FALSE, 0);
+	hbox2 = gtk_hbox_new(FALSE, 0);
 	
 	fa->ButtonAdd = gtk_button_new_with_label("Добавить");
-	gtk_box_pack_start(GTK_BOX(hbox), fa->ButtonAdd, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox2), fa->ButtonAdd, TRUE, TRUE, 0);
 	
 	fa->ButtonCommit = gtk_button_new_with_label("Обновить в базе");
-	gtk_box_pack_start(GTK_BOX(hbox), fa->ButtonCommit, TRUE, TRUE, 0);
+	gtk_box_pack_start(GTK_BOX(hbox2), fa->ButtonCommit, TRUE, TRUE, 0);
 	
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(vbox), hbox2, FALSE, FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(fa->WindowAccount), vbox);
 	
 	gtk_window_resize(GTK_WINDOW(fa->WindowAccount), 1200, 950);
@@ -696,6 +650,82 @@ gboolean FormAccount_MoneyNowKeyRelease(GtkWidget* widget, GdkEvent* event, gpoi
 	FormAccount_UpdateRemain(fa);
 	
 	return FALSE;
+}
+
+GtkWidget* FormAccount_Part1(FormAccount* fa)
+{
+	GtkWidget* tbl;
+	GtkWidget* label;
+	gint row1, row2;
+	
+	
+	tbl = gtk_table_new(3, 2, FALSE);
+	row1=0; row2=1;
+	
+	label = gtk_label_new("Неизвестный расход:");
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_widget_set_usize(label, 250, 50);
+	gtk_table_attach(GTK_TABLE(tbl), label,             0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
+	
+	fa->LabelRemain = gtk_label_new(NULL);
+	gtk_misc_set_alignment(GTK_MISC(fa->LabelRemain), 0, 0.5);
+	gtk_table_attach(GTK_TABLE(tbl), fa->LabelRemain,   1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+	++row1; ++row2;
+	
+	label = gtk_label_new(NULL);
+	gtk_label_set_markup(GTK_LABEL(label), "Денег в настоящий момент:");
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
+	fa->EntryMoneyNow = gtk_entry_new();
+	gtk_entry_set_text(GTK_ENTRY(fa->EntryMoneyNow), "0");
+	gtk_table_attach(GTK_TABLE(tbl), fa->EntryMoneyNow, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+	++row1; ++row2;
+	
+	label = gtk_label_new("Дата:");
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
+	fa->CalendarDate = gtk_calendar_new();
+	fa->CalendarDateOnSelectEnabled = TRUE;
+	gtk_table_attach(GTK_TABLE(tbl), fa->CalendarDate, 1, 2, row1, row2, 0, 0, 0, 0);
+	
+	return tbl;
+}
+
+GtkWidget* FormAccount_Part2(FormAccount* fa)
+{
+	GtkWidget* scroll2;
+	GtkWidget* tbl;
+	GtkWidget* label;
+	gint row1, row2;
+	
+	
+	tbl = gtk_table_new(3, 2, FALSE);
+	row1=0; row2=1;
+	
+	label = gtk_label_new("Описание:");
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
+	fa->EntryDescription = gtk_entry_new();
+	gtk_table_attach(GTK_TABLE(tbl), fa->EntryDescription, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+	++row1; ++row2;
+	
+	label = gtk_label_new("Деньги:");
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
+	fa->EntryMoney = gtk_entry_new();
+	gtk_table_attach(GTK_TABLE(tbl), fa->EntryMoney, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL, 0, 0);
+	++row1; ++row2;
+	
+	label = gtk_label_new("Категория:");
+	gtk_misc_set_alignment(GTK_MISC(label), 0, 0.5);
+	gtk_table_attach(GTK_TABLE(tbl), label,           0, 1, row1, row2, GTK_FILL, GTK_FILL, 0, 0);
+	
+	scroll2 = gtk_scrolled_window_new(NULL, NULL);
+	TreeViewCategories_Create(&fa->tvc, fa->MySQL);
+	gtk_container_add(GTK_CONTAINER(scroll2), fa->tvc.treeview);
+	gtk_table_attach(GTK_TABLE(tbl), scroll2, 1, 2, row1, row2, GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 0, 0);
+	
+	return tbl;
 }
 
 void FormAccount_SetCursorOnLast(FormAccount* fa)
