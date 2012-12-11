@@ -29,6 +29,7 @@ void CatTreeNode_HaveOperationsUpdate(CatTreeNode* ctn);
 void CatTreeNode_Percent(CatTreeNode* ctn);
 void CatTreeNode_Print(CatTreeNode* ctn, int a);
 void CatTreeNode_Print2(CatTreeNode* ctn, int a);
+void CatTreeNode_Print3(CatTreeNode* ctn);
 void CatTreeNode_Sum(CatTreeNode* ctn);
 
 
@@ -378,18 +379,27 @@ void CatTreeNode_HaveOperationsUpdate(CatTreeNode* ctn)
 	CatTreeNode* child;
 	
 	
-	for ( ; ctn != NULL; ctn = ctn->next)
+NEXT1:	if (ctn == NULL)
+		return ;
+	if (child = ctn->child)
 	{
-		ctn->have_operations = 0;
-		
-		for (child = ctn->child; child != NULL; child = child->next)
-		{
-			CatTreeNode_HaveOperationsUpdate(child);
-			ctn->have_operations = ctn->have_operations || child->have_operations;
+		CatTreeNode_HaveOperationsUpdate(child);
+	NEXT2:	if (child->have_operations) {
+			ctn->have_operations = 1;
+			ctn = ctn->next;
+			goto NEXT1;
 		}
-		
-		ctn->have_operations = ctn->have_operations || ctn->opers.First;
+		else {
+			child = child->next;
+			if (child)
+				goto NEXT2;
+		}
 	}
+	
+	ctn->have_operations = !!ctn->opers.First;
+	ctn = ctn->next;
+	
+	goto NEXT1;
 }
 
 void CatTree_Init(CatTree* ct)
@@ -605,6 +615,17 @@ void CatTreeNode_Print2(CatTreeNode* ctn, int a)
 		printf("\n");
 		if (ctn->child)
 			CatTreeNode_Print2(ctn->child, a+1);
+	}
+}
+
+void CatTreeNode_Print3(CatTreeNode* ctn)
+{
+	if (ctn->parent) {
+		CatTreeNode_Print3(ctn->parent);
+		printf("::%s", ctn->name);
+	}
+	else {
+		printf("%s", ctn->name);
 	}
 }
 
