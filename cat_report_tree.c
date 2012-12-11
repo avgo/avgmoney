@@ -20,6 +20,7 @@ unsigned int CatTree_Add(CatTree* ct, unsigned int id, unsigned int parent_id, c
 void CatTree_Filter2(CatTree* ct, CatTreeNode* ctn);
 unsigned int CatTree_Filter3(CatTree* ct, CatRepOperation* oper);
 void CatTree_Filter4(CatTree* ct);
+void CatTree_HaveOperationsUpdate(CatTree* ct);
 void CatTree_LoadOperations(CatTree* ct);
 void CatTree_Percent(CatTree* ct);
 void CatTree_Sum(CatTree* ct);
@@ -270,7 +271,7 @@ void CatTree_Filter(CatTree* ct,
 	CatTree_Filter2(ct, ct->First);
 	CatTree_Filter4(ct);
 	CatRepOperations_Add3(&ct->operations, &ct->trash);
-	CatTreeNode_HaveOperationsUpdate(ct->First);
+	CatTree_HaveOperationsUpdate(ct);
 	CatTree_Sum(ct);
 	CatTree_Percent(ct);
 }
@@ -349,6 +350,16 @@ void CatTree_Filter4(CatTree* ct)
 	}
 }
 
+void CatTree_HaveOperationsUpdate(CatTree* ct)
+{
+	CatTreeNode* ctn;
+	
+	
+	for (ctn = ct->First; ctn != NULL; ctn = ctn->next) {
+		CatTreeNode_HaveOperationsUpdate(ctn);
+	}
+}
+
 void CatTree_Close(CatTree* ct)
 {
 	CatTreeNode_FreeRecursive(ct->First);
@@ -379,27 +390,14 @@ void CatTreeNode_HaveOperationsUpdate(CatTreeNode* ctn)
 	CatTreeNode* child;
 	
 	
-NEXT1:	if (ctn == NULL)
-		return ;
-	if (child = ctn->child)
-	{
+	ctn->have_operations = 0;
+	for (child = ctn->child; child != NULL; child = child->next) {
 		CatTreeNode_HaveOperationsUpdate(child);
-	NEXT2:	if (child->have_operations) {
+		if (child->have_operations) {
 			ctn->have_operations = 1;
-			ctn = ctn->next;
-			goto NEXT1;
-		}
-		else {
-			child = child->next;
-			if (child)
-				goto NEXT2;
 		}
 	}
-	
-	ctn->have_operations = !!ctn->opers.First;
-	ctn = ctn->next;
-	
-	goto NEXT1;
+	ctn->have_operations = ctn->have_operations || ctn->opers.First;
 }
 
 void CatTree_Init(CatTree* ct)
