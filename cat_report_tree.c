@@ -395,7 +395,12 @@ void CatTreeNode_HaveOperationsUpdate(CatTreeNode* ctn)
 		CatTreeNode_HaveOperationsUpdate(child);
 		if (child->have_operations) {
 			ctn->have_operations = 1;
+			child = child->next;
+			break;
 		}
+	}
+	for ( ; child != NULL; child = child->next) {
+		CatTreeNode_HaveOperationsUpdate(child);
 	}
 	ctn->have_operations = ctn->have_operations || ctn->opers.First;
 }
@@ -575,10 +580,24 @@ void CatTreeNode_Print(CatTreeNode* ctn, int a)
 	
 	for ( ; ctn != NULL; ctn = ctn->next)
 	{
-		printf("%10u%10u", ctn->id, ctn->parent_id);
-		for (i = 0; i < a; ++i)
-			printf("   ");
-		printf("    %s\n", ctn->name);
+		for (i = 0; i < a; ++i)    printf("    ");
+		printf("id: %u\n", ctn->id);
+		
+		for (i = 0; i < a; ++i)    printf("    ");
+		printf("parent_id: %u\n", ctn->parent_id);
+		
+		for (i = 0; i < a; ++i)    printf("    ");
+		printf("name: \"%s\"\n", ctn->name);
+		
+		for (i = 0; i < a; ++i)    printf("    ");
+		printf("have_operations: %u\n", ctn->have_operations);
+		
+		for (i = 0; i < a; ++i)    printf("    ");
+		printf("opers.First: %p\n", ctn->opers.First);
+		
+		for (i = 0; i < a; ++i)    printf("    ");
+		printf("\n");
+		
 		if (ctn->child)
 			CatTreeNode_Print(ctn->child, a+1);
 	}
@@ -620,10 +639,10 @@ void CatTreeNode_Print3(CatTreeNode* ctn)
 {
 	if (ctn->parent) {
 		CatTreeNode_Print3(ctn->parent);
-		printf("::%s", ctn->name);
+		printf("::%s(%u)", ctn->name, ctn->have_operations);
 	}
 	else {
-		printf("%s", ctn->name);
+		printf("%s(%u)", ctn->name, ctn->have_operations);
 	}
 }
 
