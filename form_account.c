@@ -856,6 +856,11 @@ void FormAccount_UpdateData(FormAccount* fa, char* AccID)
 		if (!TreeViewCategories_FindCategoryByID2(&fa->tvc, Category, NULL, NULL, &CategoryPath))
 		{
 			CategoryPath = g_strdup("");
+			
+			if (Category) {
+				g_print("нет категории (%u) для  %s | %s | %s | %.2f\n",
+						Category, Row[0], Row[1], Row[2], Money);
+			}
 		}
 		
 		gtk_list_store_append(fa->ListStoreAccount, &Iter);

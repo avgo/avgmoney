@@ -128,7 +128,9 @@ void AvgMoney_MySQLPrepare()
 	if (mysql_real_connect(&AvgMoneyApp->MySQL, "", "", "", NULL,
 			0, NULL, 0) == NULL)
 	{
-		g_print("%s() \n", __func__);
+		g_print("%s() %s (%u).\n", __func__,
+				mysql_error(&AvgMoneyApp->MySQL),
+				mysql_errno(&AvgMoneyApp->MySQL));
 		exit(1);
 	}
 	
