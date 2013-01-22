@@ -241,8 +241,8 @@ void FormAccount_ButtonCommitClicked(GtkButton* button, gpointer user_data)
 				break;
 			}
 			
-			g_print("%s\t" "%s\t" "\"%s\"\t" "%.2f\n",
-					rec_state_str, DateStr, DescriptionStr, Money);
+			g_print("%s\t" "%s\t" "\"%s\"\t" "%.2f\t" "%u\n",
+					rec_state_str, DateStr, DescriptionStr, Money, CategoryID);
 			
 			DateStrToDMY(DateStr, &DateYear, &DateMonth, &DateDay);
 			row_datetime.year         = DateYear;
